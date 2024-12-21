@@ -2,9 +2,11 @@ package com.example.cimatecequalizer.views
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,10 +14,20 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.*
 import androidx.compose.material3.Button
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -24,90 +36,237 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
+import com.example.cimatecequalizer.models.Equalizer
+import com.example.cimatecequalizer.models.User
 import com.example.cimatecequalizer.viewModels.UserViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun UserView(
     navController: NavController,
     userViewModel: UserViewModel,
 ) {
+    Scaffold(
+        topBar = {
+            CenterAlignedTopAppBar(
+                title = {
+                    Text(
+                        text = "Usuários",
+                        color = Color.Black,
+                        fontWeight = FontWeight.Bold,
+                    )
+                },
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                    containerColor = Color.White
+                )
+            )
+        },
+        content = { padding ->
+            UserContent(
+                paddingValues = padding,
+                userViewModel = userViewModel,
+                navController = navController,
+            )
+        }
+    )
+}
 
-    Column(
+@Composable
+internal fun UserContent(
+    paddingValues: PaddingValues,
+    userViewModel: UserViewModel,
+    navController: NavController,
+) {
+    val state = userViewModel.state
+    var showUserPopup by remember { mutableStateOf(false) }
+
+    Box(
+        contentAlignment = Alignment.Center,
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFF0F0F0))
-            .padding(20.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .padding(paddingValues)
     ) {
-        Text(
-            text = "Lista de usuários",
-            fontSize = 24.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
-
-        Box(
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f)
-                .background(Color(0xFFE0E0E0), RoundedCornerShape(16.dp))
-                .padding(16.dp)
+                .fillMaxSize()
+                .padding(paddingValues),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.SpaceEvenly,
         ) {
-            LazyColumn {
-                items(12) { // Quantidade de usuários
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .pointerInput(Unit) {
-                                detectTapGestures {
-                                    navController.navigate("equalizerView")
-                                }
-                            }
-                    ) {
+            LazyColumn(
+                verticalArrangement = Arrangement.Top,
+                horizontalAlignment = Alignment.CenterHorizontally,
+                contentPadding = PaddingValues(all = 20.dp),
+                modifier = Modifier
+                    .padding(20.dp)
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .background(Color(0xFFE0E0E0), RoundedCornerShape(16.dp))
+            ) {
+                if (state.userList.isEmpty()) {
+                    item {
                         Text(
-                            text = "Luiz Augusto",
+                            text = "Nenhum usuário cadastrado",
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Medium
                         )
-                        Text(
-                            text = "Home",
-                            fontSize = 14.sp,
-                            color = Color.Gray
-                        )
-                        HorizontalDivider(
-                            color = Color.Black,
-                            thickness = 1.dp,
-                            modifier = Modifier.padding(vertical = 8.dp)
+                        Spacer(modifier = Modifier.height(20.dp))
+                    }
+                } else {
+                    items(state.userList) { user ->
+                        User(
+                            user = user,
+                            goToEqualizer = { navController.navigate("equalizerView") },
+                            editUser = { userViewModel.updateUser(user) },
+                            deleteUser = { userViewModel.deleteUser(user) }
                         )
                     }
                 }
             }
+
+            Button(onClick = { showUserPopup = true }) {
+                Text("Criar Usuário")
+            }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        if (showUserPopup) {
+            UserCreationPopup(
+                onDismissRequest = { showUserPopup = false },
+                createUser = { name, eqName ->
+                    userViewModel.createUser(
+                        user = User(
+                            name = name,
+                            eqName = eqName,
+                            equalizer = Equalizer()
+                        )
+                    )
+                    showUserPopup = false
+                },
+            )
+        }
+    }
+}
 
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally
+@Composable
+internal fun User(
+    user: User,
+    goToEqualizer: () -> Unit,
+    editUser: () -> Unit,
+    deleteUser: () -> Unit
+) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .pointerInput(Unit) { detectTapGestures { goToEqualizer() } }
             ) {
-                Button(onClick = { userViewModel.deleteUser() }) {
-                    Text("Excluir Usuário")
-                }
-                Button(onClick = { userViewModel.updateUser() }) {
-                    Text("Editar Usuário")
-                }
+                Text(
+                    text = user.name,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Medium
+                )
+                Text(
+                    text = user.eqName,
+                    fontSize = 14.sp,
+                    color = Color.Gray
+                )
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Row {
+                IconButton(
+                    onClick = { editUser() }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Edit,
+                        contentDescription = "Edit",
+                        tint = Color.Black
+                    )
+                }
 
+                IconButton(
+                    onClick = { deleteUser() }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = "Delete",
+                        tint = Color.Black
+                    )
+                }
+            }
+        }
 
-            Button(onClick = { userViewModel.createUser() }) {
-                Text("Criar Usuário")
+        HorizontalDivider(
+            color = Color.Black,
+            thickness = 1.dp,
+            modifier = Modifier.padding(vertical = 8.dp)
+        )
+    }
+}
+
+@Composable
+internal fun UserCreationPopup(
+    onDismissRequest: () -> Unit,
+    createUser: (String, String) -> Unit,
+) {
+    var name by remember { mutableStateOf("") }
+    var description by remember { mutableStateOf("") }
+
+    Dialog(onDismissRequest = onDismissRequest) {
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            shape = RoundedCornerShape(16.dp),
+            color = MaterialTheme.colorScheme.background
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "Criar usuário",
+                    style = MaterialTheme.typography.headlineSmall
+                )
+
+                OutlinedTextField(
+                    value = name,
+                    onValueChange = { name = it },
+                    label = { Text("Nome") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                OutlinedTextField(
+                    value = description,
+                    onValueChange = { description = it },
+                    label = { Text("Descrição") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    TextButton(onClick = onDismissRequest) {
+                        Text("Cancelar")
+                    }
+
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    Button(onClick = {
+                        createUser(name, description)
+                    }) {
+                        Text("Criar")
+                    }
+                }
             }
         }
     }

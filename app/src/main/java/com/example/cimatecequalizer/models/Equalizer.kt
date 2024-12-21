@@ -1,8 +1,11 @@
 package com.example.cimatecequalizer.models
 
-data class Equalizer (
+import kotlinx.serialization.Serializable
+
+@Serializable
+data class Equalizer(
     val id: Int = 0,
-    val name: String,
-    val level: Int,
-    val frequencies: List<Int>,
+    val name: String = "Equalizer $id",
+    val level: Int = 10,
+    val frequencies: List<Int> = listOf(0, 0, 0, 0, 0, 0),
 )
