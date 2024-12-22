@@ -11,14 +11,14 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.*
 import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -26,7 +26,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -48,6 +47,8 @@ internal fun UserView(
     navController: NavController,
     userViewModel: UserViewModel,
 ) {
+    var showCreateUserPopup by remember { mutableStateOf(false) }
+
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
@@ -58,16 +59,24 @@ internal fun UserView(
                         fontWeight = FontWeight.Bold,
                     )
                 },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = Color.White
-                )
             )
+        },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = { showCreateUserPopup = true },
+                shape = CircleShape,
+                containerColor = Color.Black
+            ) {
+                Text("+", fontSize = 24.sp, color = Color.White)
+            }
         },
         content = { padding ->
             UserContent(
-                paddingValues = padding,
-                userViewModel = userViewModel,
                 navController = navController,
+                paddingValues = padding,
+                showCreateUserPopup = showCreateUserPopup,
+                userViewModel = userViewModel,
+                closePopup = { showCreateUserPopup = false },
             )
         }
     )
@@ -75,23 +84,20 @@ internal fun UserView(
 
 @Composable
 internal fun UserContent(
-    paddingValues: PaddingValues,
-    userViewModel: UserViewModel,
     navController: NavController,
+    paddingValues: PaddingValues,
+    showCreateUserPopup: Boolean,
+    userViewModel: UserViewModel,
+    closePopup: () -> Unit,
 ) {
     val state = userViewModel.state
-    var showUserPopup by remember { mutableStateOf(false) }
 
     Box(
         contentAlignment = Alignment.Center,
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(paddingValues)
+        modifier = Modifier.padding(paddingValues)
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues),
+            modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceEvenly,
         ) {
@@ -101,8 +107,7 @@ internal fun UserContent(
                 contentPadding = PaddingValues(all = 20.dp),
                 modifier = Modifier
                     .padding(20.dp)
-                    .fillMaxWidth()
-                    .weight(1f)
+                    .fillMaxSize()
                     .background(Color(0xFFE0E0E0), RoundedCornerShape(16.dp))
             ) {
                 if (state.userList.isEmpty()) {
@@ -112,29 +117,32 @@ internal fun UserContent(
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Medium
                         )
-                        Spacer(modifier = Modifier.height(20.dp))
                     }
                 } else {
                     items(state.userList) { user ->
-                        User(
+                        UserRow(
                             user = user,
-                            goToEqualizer = { navController.navigate("equalizerView") },
-                            editUser = { userViewModel.updateUser(user) },
+                            goToEqualizer = {
+                                navController.navigate(
+                                    "equalizerView/${user.id}/${user.name}/${user.eqName}"
+                                )
+                            },
+                            editUser = {
+                                navController.navigate(
+                                    "updateUserView/${user.id}/${user.name}/${user.eqName}"
+                                )
+                            },
                             deleteUser = { userViewModel.deleteUser(user) }
                         )
                     }
                 }
             }
-
-            Button(onClick = { showUserPopup = true }) {
-                Text("Criar Usuário")
-            }
         }
 
-        if (showUserPopup) {
-            UserCreationPopup(
-                onDismissRequest = { showUserPopup = false },
-                createUser = { name, eqName ->
+        if (showCreateUserPopup) {
+            CreateUserPopup(
+                onDismissRequest = { closePopup() },
+                create = { name, eqName ->
                     userViewModel.createUser(
                         user = User(
                             name = name,
@@ -142,7 +150,7 @@ internal fun UserContent(
                             equalizer = Equalizer()
                         )
                     )
-                    showUserPopup = false
+                    closePopup()
                 },
             )
         }
@@ -150,7 +158,7 @@ internal fun UserContent(
 }
 
 @Composable
-internal fun User(
+internal fun UserRow(
     user: User,
     goToEqualizer: () -> Unit,
     editUser: () -> Unit,
@@ -183,9 +191,8 @@ internal fun User(
                     onClick = { editUser() }
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Edit,
-                        contentDescription = "Edit",
-                        tint = Color.Black
+                        imageVector = Icons.Default.Info,
+                        contentDescription = "Info"
                     )
                 }
 
@@ -210,9 +217,9 @@ internal fun User(
 }
 
 @Composable
-internal fun UserCreationPopup(
+internal fun CreateUserPopup(
     onDismissRequest: () -> Unit,
-    createUser: (String, String) -> Unit,
+    create: (String, String) -> Unit,
 ) {
     var name by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
@@ -262,7 +269,7 @@ internal fun UserCreationPopup(
                     Spacer(modifier = Modifier.width(8.dp))
 
                     Button(onClick = {
-                        createUser(name, description)
+                        create(name, description)
                     }) {
                         Text("Criar")
                     }
