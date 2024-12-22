@@ -122,11 +122,7 @@ internal fun UserContent(
                     items(state.userList) { user ->
                         UserRow(
                             user = user,
-                            goToEqualizer = {
-                                navController.navigate(
-                                    "equalizerView/${user.id}/${user.name}/${user.eqName}"
-                                )
-                            },
+                            goToEqualizer = { navController.navigate(user) },
                             editUser = {
                                 navController.navigate(
                                     "updateUserView/${user.id}/${user.name}/${user.eqName}"
@@ -147,7 +143,7 @@ internal fun UserContent(
                         user = User(
                             name = name,
                             eqName = eqName,
-                            equalizer = Equalizer()
+                            equalizer = Equalizer(name = eqName)
                         )
                     )
                     closePopup()

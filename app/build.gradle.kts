@@ -5,6 +5,7 @@ plugins {
     //
     alias(libs.plugins.ksp)
     alias(libs.plugins.serialization)
+    alias(libs.plugins.parcelize)
 }
 
 android {
