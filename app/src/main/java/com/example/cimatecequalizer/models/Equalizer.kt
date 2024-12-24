@@ -9,5 +9,5 @@ import kotlinx.serialization.Serializable
 data class Equalizer(
     val name: String = "Equalizer",
     val level: Int = 10,
-    val frequencies: Array<Float> = arrayOf(0f, 0f, 0f, 0f, 0f, 0f),
+    val frequencies: List<Float> = listOf(0f, 0f, 0f, 0f, 0f, 0f),
 ) : Parcelable

@@ -37,13 +37,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
-import com.example.cimatecequalizer.models.Equalizer
 import com.example.cimatecequalizer.models.User
+import com.example.cimatecequalizer.navigation.UserDetailProfile
 import com.example.cimatecequalizer.viewModels.UserViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun UserView(
+internal fun UserListView(
     navController: NavController,
     userViewModel: UserViewModel,
 ) {
@@ -90,7 +90,7 @@ internal fun UserContent(
     userViewModel: UserViewModel,
     closePopup: () -> Unit,
 ) {
-    val state = userViewModel.state
+    val state by userViewModel.uiListViewState.collectAsState()
 
     Box(
         contentAlignment = Alignment.Center,
@@ -125,7 +125,11 @@ internal fun UserContent(
                             goToEqualizer = { navController.navigate(user) },
                             editUser = {
                                 navController.navigate(
-                                    "updateUserView/${user.id}/${user.name}/${user.eqName}"
+                                    UserDetailProfile(
+                                        userId = user.id,
+                                        userName = user.name,
+                                        eqName = user.equalizer.name
+                                    )
                                 )
                             },
                             deleteUser = { userViewModel.deleteUser(user) }
@@ -139,13 +143,7 @@ internal fun UserContent(
             CreateUserPopup(
                 onDismissRequest = { closePopup() },
                 create = { name, eqName ->
-                    userViewModel.createUser(
-                        user = User(
-                            name = name,
-                            eqName = eqName,
-                            equalizer = Equalizer(name = eqName)
-                        )
-                    )
+                    userViewModel.createUser(userName = name, eqName = eqName)
                     closePopup()
                 },
             )
@@ -176,7 +174,7 @@ internal fun UserRow(
                     fontWeight = FontWeight.Medium
                 )
                 Text(
-                    text = user.eqName,
+                    text = user.equalizer.name,
                     fontSize = 14.sp,
                     color = Color.Gray
                 )

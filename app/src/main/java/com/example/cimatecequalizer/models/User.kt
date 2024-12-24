@@ -12,8 +12,6 @@ data class User(
     val id: Int = 0,
     @ColumnInfo(name = "name")
     val name: String,
-    @ColumnInfo(name = "eqName")
-    val eqName: String,
     @ColumnInfo(name = "equalizers")
     val equalizer: Equalizer,
 )

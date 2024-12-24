@@ -13,6 +13,9 @@ interface UserDao {
     @Query("SELECT * FROM users")
     fun getUsers(): Flow<List<User>>
 
+    @Query("SELECT * FROM users WHERE id == :userId")
+    suspend fun getUser(userId: Int): User
+
     @Insert
     suspend fun insertUser(user: User)
 
