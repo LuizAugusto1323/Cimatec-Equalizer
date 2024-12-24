@@ -1,31 +1,44 @@
 package com.example.cimatecequalizer.viewModels
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.cimatecequalizer.models.Equalizer
 import com.example.cimatecequalizer.models.User
 import com.example.cimatecequalizer.room.UserDao
-import com.example.cimatecequalizer.states.UserState
+import com.example.cimatecequalizer.states.EqualizerUiState
+import com.example.cimatecequalizer.states.UserDetailUiState
+import com.example.cimatecequalizer.states.UserListUiState
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class UserViewModel(private val userDao: UserDao) : ViewModel() {
-    var state by mutableStateOf(UserState())
-        private set
+
+    private val _uiUserListState = MutableStateFlow(UserListUiState())
+    val uiListViewState = _uiUserListState.asStateFlow()
+
+    private val _uiUserDetailViewState = MutableStateFlow(UserDetailUiState())
+    val uiUserDetailViewState = _uiUserDetailViewState.asStateFlow()
+
+    private val _uiEqualizerViewState = MutableStateFlow(EqualizerUiState())
+    val uiEqualizerViewState = _uiEqualizerViewState.asStateFlow()
 
     // todo: remover logs quando os testes unitarios estiverem implementados.
     init {
         viewModelScope.launch {
             userDao.getUsers().collectLatest {
-                state = state.copy(userList = it)
-                println("********** state $state")
+                println("********** state $it")
+                _uiUserListState.update { currenState ->
+                    currenState.copy(userList = it)
+                }
             }
         }
     }
 
-    fun createUser(user: User) {
+    fun createUser(userName: String, eqName: String) {
+        val user = User(name = userName, equalizer = Equalizer(name = eqName))
         viewModelScope.launch {
             println("********** create user $user")
             userDao.insertUser(user = user)
@@ -39,9 +52,27 @@ class UserViewModel(private val userDao: UserDao) : ViewModel() {
         }
     }
 
-    fun updateUser(user: User) {
+    fun updateUser(userId: Int, userName: String, eqName: String) {
         viewModelScope.launch {
-            println("********** update user $user")
+            val user = userDao.getUser(userId).copy(name = userName).let {
+                it.copy(equalizer = it.equalizer.copy(name = eqName))
+            }
+            println("********** update user")
+            userDao.updateUser(user = user)
+        }
+    }
+
+    fun updateEqualizer(userId: Int, column: Int, frequency: Float) {
+        viewModelScope.launch {
+            val user = userDao.getUser(userId).let {
+                it.copy(
+                    equalizer = it.equalizer.copy(
+                        frequencies = it.equalizer.frequencies.toMutableList()
+                            .apply { this[column] = frequency })
+                )
+            }
+
+            println("********** update Equalizer $user")
             userDao.updateUser(user = user)
         }
     }

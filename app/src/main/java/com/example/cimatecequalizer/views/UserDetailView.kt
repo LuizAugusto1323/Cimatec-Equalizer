@@ -4,15 +4,22 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -25,8 +32,8 @@ import com.example.cimatecequalizer.viewModels.UserViewModel
 internal fun UpdateUserView(
     navController: NavController,
     userViewModel: UserViewModel,
-    id: Int,
-    name: String,
+    userId: Int,
+    userName: String,
     eqName: String,
 ) {
     Scaffold(
@@ -54,7 +61,7 @@ internal fun UpdateUserView(
             )
         },
     ) {
-        UpdateContentView(it, navController, userViewModel, id, name, eqName)
+        UpdateContentView(it, navController, userViewModel, userId, userName, eqName)
     }
 }
 
@@ -63,25 +70,51 @@ fun UpdateContentView(
     paddingValues: PaddingValues,
     navController: NavController,
     viewModel: UserViewModel,
-    id: Int,
-    name: String,
-    eqName: String
+    userId: Int,
+    userName: String,
+    eqName: String,
 ) {
+
+    var userNameView by remember { mutableStateOf(userName) }
+    var eqNameView by remember { mutableStateOf(eqName) }
+
     Column(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.fillMaxSize(),
         content = {
             Text(
-                text = "Atualizar Usuário",
+                text = "ID = $userId",
                 color = Color.Black,
                 fontWeight = FontWeight.Bold
             )
             Text(
-                text = "id = $id, name = $name, eqName = $eqName",
+                text = "Name",
                 color = Color.Black,
                 fontWeight = FontWeight.Bold
             )
+            OutlinedTextField(
+                value = userNameView,
+                onValueChange = { userNameView = it },
+                //label = { Text("Nome") },
+                modifier = Modifier.fillMaxWidth()
+            )
+            Text(
+                text = "EqName",
+                color = Color.Black,
+                fontWeight = FontWeight.Bold
+            )
+            OutlinedTextField(
+                value = eqNameView,
+                onValueChange = { eqNameView = it },
+                //label = { Text("Nome") },
+                modifier = Modifier.fillMaxWidth()
+            )
+            Button(onClick = {
+                viewModel.updateUser(userId, userNameView, eqNameView)
+            }) {
+                Text("Update")
+            }
         }
     )
 }

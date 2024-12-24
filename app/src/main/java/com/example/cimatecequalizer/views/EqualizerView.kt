@@ -113,20 +113,7 @@ internal fun EqualizerContent(
         GraphicEqualizer(
             equalizer = user.equalizer,
             updateFrequency = { column, frequency ->
-                val updatedUser = User(
-                    id = user.id,
-                    name = user.name,
-                    eqName = user.eqName,
-                    equalizer = Equalizer(
-                        name = user.equalizer.name,
-                        level = user.equalizer.level,
-                        frequencies = frequencies,
-                    )
-                )
-
-                frequencies[column] = frequency
-
-                userViewModel.updateUser(user = updatedUser)
+                userViewModel.updateEqualizer(userId = user.id, column, frequency)
             }
         )
     }
