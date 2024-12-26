@@ -27,6 +27,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -65,12 +66,12 @@ internal fun EqualizerView(
                 title = {
                     Text(
                         text = "Equalizador",
-                        color = Color.Black,
+                        color = MaterialTheme.colorScheme.onSurface,
                         fontWeight = FontWeight.Bold,
                     )
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = Color.White
+                    containerColor = MaterialTheme.colorScheme.background,
                 ),
                 navigationIcon = {
                     IconButton(
@@ -79,7 +80,7 @@ internal fun EqualizerView(
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                                 contentDescription = "Back",
-                                tint = Color.Black,
+                                tint = MaterialTheme.colorScheme.onSurface,
                             )
                         }
                     )
@@ -102,11 +103,12 @@ internal fun EqualizerContent(
     user: User,
     userViewModel: UserViewModel,
 ) {
-    val frequencies = user.equalizer.frequencies
 
-    Column {
+    Column(
+        modifier = Modifier.padding(10.dp)
+    ) {
         Text(
-            text = "Equalizador ${user.name}",
+            text = "Usuário: ${user.name}",
             style = MaterialTheme.typography.headlineLarge,
             modifier = Modifier.padding(padding)
         )
@@ -128,7 +130,6 @@ internal fun GraphicEqualizer(
         horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
-            // padding para nao atrapalhar botao do ios
             .padding(bottom = 10.dp)
             .fillMaxWidth(),
         content = {
@@ -140,7 +141,6 @@ internal fun GraphicEqualizer(
                         SliderCustom(
                             index = index,
                             frequency = equalizer.frequencies[index],
-                            thumbSize = 35,
                             updateFrequency = updateFrequency,
                             modifier = Modifier
                                 .padding(horizontal = 1.dp)
@@ -155,17 +155,15 @@ internal fun GraphicEqualizer(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun SliderCustom(
     frequency: Float,
     index: Int,
     modifier: Modifier = Modifier,
     updateFrequency: (column: Int, frequency: Float) -> Unit,
-    thumbBackground: Color = Color(color = 0xFF191919),
-    thumbSize: Int = 30,
 ) {
     var sliderValue by remember(frequency) { mutableFloatStateOf(frequency) }
+    var gainFrequencies = listOf(32f, 125f, 250f, 1000f, 4000f, 16000f)
 
     Column(
         modifier = modifier,
@@ -197,13 +195,6 @@ internal fun SliderCustom(
                 .weight(1F)
                 .background(Color.Transparent),
         ) {
-
-            //ranhuras
-            Grooves()
-
-            //track externa
-            ExternalTrack()
-
             Slider(
                 value = sliderValue,
                 onValueChange = {
@@ -216,32 +207,12 @@ internal fun SliderCustom(
                         sliderValue,
                     )
                 },
-                thumb = {
-                    Box(
-                        modifier = Modifier
-                            .size(width = thumbSize.dp, height = (thumbSize * .9).dp)
-                            .padding(5.dp)
-                            .thumb(shape = RoundedCornerShape(3.dp))
-                            .background(thumbBackground)
-                            .border(
-                                width = 1.dp,
-                                color = Color.Black,
-                                shape = RoundedCornerShape(3.dp)
-                            ),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .padding(2.dp)
-                                .background(Color.White)
-                                .height(thumbSize.dp)
-                                .width(2.dp)
-                        )
-                    }
-                },
-                track = {
-                    Box(modifier = Modifier.track())
-                },
+                colors = SliderDefaults.colors(
+                    thumbColor = MaterialTheme.colorScheme.primary,
+                    disabledThumbColor = MaterialTheme.colorScheme.onBackground,
+                    activeTrackColor = MaterialTheme.colorScheme.primary,
+                    inactiveTrackColor = MaterialTheme.colorScheme.secondary,
+                ),
                 modifier = Modifier
                     .graphicsLayer {
                         rotationZ = 270f
@@ -262,84 +233,28 @@ internal fun SliderCustom(
                     },
             )
         }
-    }
-}
 
-@Composable
-private fun Grooves() {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(vertical = 14.5.dp),
-        verticalArrangement = Arrangement.SpaceBetween,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        for (x in 0..12) {
-            if (x == 0 || x == 12 || x == 6) {
-                Box(
-                    modifier = Modifier
-                        .background(Color(color = 0xFFE70000))
-                        .fillMaxWidth(0.8f)
-                        .height(1.5.dp)
-                        .zIndex(-2F),
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            content = {
+                Text(
+                    text = if (gainFrequencies[index] >= 1000) {
+                        "${ gainFrequencies[index] / 1000 }k"
+                    } else {
+                        "${ gainFrequencies[index] }"
+                    },
+                    style = MaterialTheme.typography.titleSmall.copy(
+                        fontWeight = FontWeight.SemiBold
+                    )
                 )
-            } else {
-                Box(
-                    modifier = Modifier
-                        .background(Color(color = 0xFFE70000))
-                        .fillMaxWidth(.6F)
-                        .height(1.5.dp)
-                        .zIndex(-2F)
+                Text(
+                    text = "Hz",
+                    style = MaterialTheme.typography.titleSmall.copy(
+                        fontWeight = FontWeight.SemiBold
+                    )
                 )
             }
-        }
+        )
     }
 }
 
-private fun Modifier.track(
-    height: Dp = 8.dp,
-    shape: Shape = CircleShape
-) = fillMaxWidth()
-    .heightIn(min = height)
-    .clip(shape)
-
-private fun Modifier.thumb(
-    size: Dp = 20.dp,
-    shape: Shape = CircleShape
-) = defaultMinSize(minWidth = size, minHeight = size).clip(shape)
-
-@Composable
-private fun ExternalTrack() {
-    Column(
-        Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth(.3F)
-                .fillMaxHeight()
-                .background(
-                    color = MaterialTheme.colorScheme.background,
-                    shape = MaterialTheme.shapes.medium
-                )
-                .zIndex(-1F),
-            contentAlignment = Alignment.Center
-        ) {
-            Box(
-                modifier = Modifier
-                    .padding(vertical = 8.dp)
-                    .fillMaxWidth(.3F)
-                    .fillMaxHeight()
-                    .track()
-                    .border(
-                        width = 1.dp,
-                        color = Color.DarkGray,
-                        shape = CircleShape
-                    )
-                    .background(Color(0xFF181818))
-                    .zIndex(-1F)
-            )
-        }
-    }
-}
