@@ -55,7 +55,7 @@ internal fun UserListView(
                 title = {
                     Text(
                         text = "Usuários",
-                        color = Color.Black,
+                        color = MaterialTheme.colorScheme.onBackground,
                         fontWeight = FontWeight.Bold,
                     )
                 },
@@ -65,7 +65,7 @@ internal fun UserListView(
             FloatingActionButton(
                 onClick = { showCreateUserPopup = true },
                 shape = CircleShape,
-                containerColor = Color.Black
+                containerColor = MaterialTheme.colorScheme.primary,
             ) {
                 Text("+", fontSize = 24.sp, color = Color.White)
             }
@@ -186,7 +186,8 @@ internal fun UserRow(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Info,
-                        contentDescription = "Info"
+                        contentDescription = "Info",
+                        tint = Color.Black
                     )
                 }
 
@@ -257,15 +258,25 @@ internal fun CreateUserPopup(
                     horizontalArrangement = Arrangement.End
                 ) {
                     TextButton(onClick = onDismissRequest) {
-                        Text("Cancelar")
+                        Text(
+                            text = "Cancelar",
+                            color = MaterialTheme.colorScheme.primary
+                        )
                     }
 
                     Spacer(modifier = Modifier.width(8.dp))
 
-                    Button(onClick = {
+                    Button(
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primary
+                        ),
+                        onClick = {
                         create(name, description)
                     }) {
-                        Text("Criar")
+                        Text(
+                            text = "Criar",
+                            color = MaterialTheme.colorScheme.onPrimary
+                        )
                     }
                 }
             }
