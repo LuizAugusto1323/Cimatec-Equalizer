@@ -38,9 +38,11 @@ internal fun UpdateUserView(
     userName: String,
     eqName: String,
 ) {
+    // Toolbar //
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
+                // Titulo da Toobar //
                 title = {
                     Text(
                         text = "Informações do Usuário",
@@ -48,6 +50,7 @@ internal fun UpdateUserView(
                         fontWeight = FontWeight.Bold,
                     )
                 },
+                // Icone de voltar //
                 navigationIcon = {
                     IconButton(
                         onClick = { navController.popBackStack() },
@@ -63,10 +66,12 @@ internal fun UpdateUserView(
             )
         },
     ) {
+        // Modal de atualização de usuário //
         UpdateContentView(it, navController, userViewModel, userId, userName, eqName)
     }
 }
 
+// Modal de atualização de usuário //
 @Composable
 fun UpdateContentView(
     paddingValues: PaddingValues,
@@ -76,7 +81,6 @@ fun UpdateContentView(
     userName: String,
     eqName: String,
 ) {
-
     var userNameView by remember { mutableStateOf(userName) }
     var eqNameView by remember { mutableStateOf(eqName) }
 

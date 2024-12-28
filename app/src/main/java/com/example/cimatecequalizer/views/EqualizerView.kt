@@ -60,9 +60,11 @@ internal fun EqualizerView(
     user: User,
     userViewModel: UserViewModel,
 ) {
+    // Toolbar //
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
+                // Titulo da Toobar //
                 title = {
                     Text(
                         text = "Equalizador",
@@ -73,6 +75,7 @@ internal fun EqualizerView(
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
                     containerColor = MaterialTheme.colorScheme.background,
                 ),
+                // Icone de voltar //
                 navigationIcon = {
                     IconButton(
                         onClick = { navController.popBackStack() },
@@ -87,6 +90,7 @@ internal fun EqualizerView(
                 }
             )
         },
+        // Coluna do Equalizador //
         content = { padding ->
             EqualizerContent(
                 padding = padding,
@@ -97,13 +101,13 @@ internal fun EqualizerView(
     )
 }
 
+// Coluna do Equalizador //
 @Composable
 internal fun EqualizerContent(
     padding: PaddingValues,
     user: User,
     userViewModel: UserViewModel,
 ) {
-
     Column(
         modifier = Modifier.padding(10.dp)
     ) {
@@ -121,6 +125,7 @@ internal fun EqualizerContent(
     }
 }
 
+// Equalizador //
 @Composable
 internal fun GraphicEqualizer(
     equalizer: Equalizer,
@@ -155,6 +160,7 @@ internal fun GraphicEqualizer(
     )
 }
 
+// Slider do Equalizador //
 @Composable
 internal fun SliderCustom(
     frequency: Float,

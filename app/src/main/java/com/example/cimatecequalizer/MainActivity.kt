@@ -19,6 +19,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
+            // Theme do app //
             CimatecEqualizerTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(

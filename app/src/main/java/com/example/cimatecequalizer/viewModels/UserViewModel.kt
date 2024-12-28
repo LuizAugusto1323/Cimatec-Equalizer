@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class UserViewModel(private val userDao: UserDao) : ViewModel() {
-
+    // Variáveis observadas //
     private val _uiUserListState = MutableStateFlow(UserListUiState())
     val uiListViewState = _uiUserListState.asStateFlow()
 
@@ -37,6 +37,7 @@ class UserViewModel(private val userDao: UserDao) : ViewModel() {
         }
     }
 
+    // Insere um novo usuário //
     fun createUser(userName: String, eqName: String) {
         val user = User(name = userName, equalizer = Equalizer(name = eqName))
         viewModelScope.launch {
@@ -45,6 +46,7 @@ class UserViewModel(private val userDao: UserDao) : ViewModel() {
         }
     }
 
+    // Deleta um usuário //
     fun deleteUser(user: User) {
         viewModelScope.launch {
             println("********** delete user $user")
@@ -52,6 +54,7 @@ class UserViewModel(private val userDao: UserDao) : ViewModel() {
         }
     }
 
+    // Atualiza um usuário //
     fun updateUser(userId: Int, userName: String, eqName: String) {
         viewModelScope.launch {
             val user = userDao.getUser(userId).copy(name = userName).let {
@@ -62,6 +65,7 @@ class UserViewModel(private val userDao: UserDao) : ViewModel() {
         }
     }
 
+    // Salva as informações do equalizador //
     fun updateEqualizer(userId: Int, column: Int, frequency: Float) {
         viewModelScope.launch {
             val user = userDao.getUser(userId).let {
