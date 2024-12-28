@@ -49,9 +49,11 @@ internal fun UserListView(
 ) {
     var showCreateUserPopup by remember { mutableStateOf(false) }
 
+    // Toolbar //
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
+                // Titulo da Toobar //
                 title = {
                     Text(
                         text = "Usuários",
@@ -61,6 +63,7 @@ internal fun UserListView(
                 },
             )
         },
+        // Icone de cadastro de usuário //
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { showCreateUserPopup = true },
@@ -70,6 +73,7 @@ internal fun UserListView(
                 Text("+", fontSize = 24.sp, color = Color.White)
             }
         },
+        // Listas de usuários cadastrados //
         content = { padding ->
             UserContent(
                 navController = navController,
@@ -82,6 +86,7 @@ internal fun UserListView(
     )
 }
 
+// Listas de usuários cadastrados //
 @Composable
 internal fun UserContent(
     navController: NavController,
@@ -139,6 +144,7 @@ internal fun UserContent(
             }
         }
 
+        // Modal criação de usuário //
         if (showCreateUserPopup) {
             CreateUserPopup(
                 onDismissRequest = { closePopup() },
@@ -211,6 +217,7 @@ internal fun UserRow(
     }
 }
 
+// Modal criação de usuário //
 @Composable
 internal fun CreateUserPopup(
     onDismissRequest: () -> Unit,
