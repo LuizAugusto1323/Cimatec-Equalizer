@@ -59,6 +59,7 @@ dependencies {
     // room
     implementation(libs.bundles.room)
     ksp(libs.room.compiler)
+    testImplementation(libs.room.testing)
     // serialization
     implementation(libs.serialization.json)
     // ***

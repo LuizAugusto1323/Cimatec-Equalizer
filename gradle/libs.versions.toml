@@ -34,6 +34,7 @@ navigation = { group = "androidx.navigation", name = "navigation-compose", versi
 room = { group = "androidx.room", name = "room-runtime", version.ref = "room-version" }
 room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room-version" }
 room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room-version" }
+room-testing = { group = "androidx.room", name = "room-testing", version.ref = "room-version" }
 serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "serialization-json" }
 #
 [bundles]
