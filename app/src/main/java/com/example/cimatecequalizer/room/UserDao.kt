@@ -18,6 +18,10 @@ interface UserDao {
     @Query("SELECT * FROM users WHERE id == :userId")
     suspend fun getUser(userId: Int): User
 
+    // Pega um usuário em específico através de seu nome //
+    @Query("SELECT * FROM users WHERE name == :name")
+    suspend fun findUsersByName(name: String): User
+
     // Insere um novo usuário //
     @Insert
     suspend fun insertUser(user: User)
